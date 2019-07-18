@@ -1,0 +1,440 @@
+<?php
+
+/**
+ * Implements hook_menu()
+ */
+function story_array() {
+  return array(
+    'admin/content/story' => array(
+      'title' => 'BD Contact submissions',
+      'route_name' => 'story_list',
+    ),
+    'admin/content/story/add' => array(
+      'title' => 'BD Contact',
+      'route_name' => 'story_add',
+    ),
+    'admin/content/story/delete/%' => array(
+      'title' => 'Delete BD Contact submission',
+      'route_name' => 'story_delete',
+    ),
+    'admin/content/story/published/%' => array(
+      'title' => 'Delete BD Contact submission',
+      'route_name' => 'story_published',
+    ),
+  );
+}
+
+/**
+ * 
+ * @param Drupal\views\ViewExecutable $view
+ */
+function story_views_pre_render(Drupal\views\ViewExecutable $view) {
+  $bdcontact = new \Drupal\story\BdContactStorage();
+  if ($view->id() == "story_data" && $view->current_display == 'rest_export_1') {
+    $ldata = Array();
+    $resp = count($view->result);
+    if ($resp == 0) {
+      $status = 400;
+    }
+    else {
+      $status = 200;
+    }
+    foreach ($view->result as $key => $item) {
+      $nid = $item->nid;
+      $rdata = $bdcontact->getnodedata($nid);
+    }
+    header('Content-Type: application/json');
+    $finalResult = array("status" => $status, "response" => $rdata);
+
+    echo \GuzzleHttp\json_encode($finalResult);
+    exit;
+  }
+
+  if (($view->id() == "frontpage" || $view->id() == "section_data_by_name" || $view->id() == "search" ) && $view->current_display == 'rest_export_1') {
+
+    $ldata = Array();
+
+    $resp = count($view->result);
+    if ($resp == 0) {
+      $status = 400;
+    }
+    else {
+      $status = 200;
+    }
+    $i = 0;
+    foreach ($view->result as $key => $item) {
+      $nid = $item->nid;
+      $rdata[$i] = $bdcontact->getnodedatalist($nid);
+      $i++;
+    }
+
+    $seoData = "";
+    if ($view->id() == "section_data_by_name") {
+      $name = $_GET['name'];
+      if ($name == "celebrity") {
+        $seoData = array("title" => "Celebrity - Fashion, Hair & Beauty, Career, Health, and Relationships :: Cosmopolitan India", "description" => "Cosmopolitan is the lifestylist for millions of fun fearless females who want to be the best they can in every area of their lives, with information on relationships and romance, the best in fashion and beauty, as well as what's happening in pop culture and entertainment.", "keyword" => "Fashion, Hair & Beauty, Career, Health, and Relationships");
+      }
+      if ($name == "fashion") {
+        $seoData = array("title" => "Fashion - Fashion, Hair & Beauty, Career, Health, and Relationships :: Cosmopolitan India", "description" => "Cosmopolitan is the lifestylist for millions of fun fearless females who want to be the best they can in every area of their lives, with information on relationships and romance, the best in fashion and beauty, as well as what's happening in pop culture and entertainment.", "keyword" => "Fashion, Hair & Beauty, Career, Health, and Relationships");
+      }
+      if ($name == "beauty") {
+        $seoData = array("title" => "Beauty - Fashion, Hair & Beauty, Career, Health, and Relationships :: Cosmopolitan India", "description" => "Cosmopolitan is the lifestylist for millions of fun fearless females who want to be the best they can in every area of their lives, with information on relationships and romance, the best in fashion and beauty, as well as what's happening in pop culture and entertainment.", "keyword" => "Fashion, Hair & Beauty, Career, Health, and Relationships");
+      }
+      if ($name == "relationships") {
+        $seoData = array("title" => "Relationships - Fashion, Hair & Beauty, Career, Health, and Relationships :: Cosmopolitan India", "description" => "Cosmopolitan is the lifestylist for millions of fun fearless females who want to be the best they can in every area of their lives, with information on relationships and romance, the best in fashion and beauty, as well as what's happening in pop culture and entertainment.", "keyword" => "Fashion, Hair & Beauty, Career, Health, and Relationships");
+      }if ($name == "life") {
+        $seoData = array("title" => "Life - Fashion, Hair & Beauty, Career, Health, and Relationships :: Cosmopolitan India", "description" => "Cosmopolitan is the lifestylist for millions of fun fearless females who want to be the best they can in every area of their lives, with information on relationships and romance, the best in fashion and beauty, as well as what's happening in pop culture and entertainment.", "keyword" => "Fashion, Hair & Beauty, Career, Health, and Relationships");
+      }
+    }
+
+    header('Content-Type: application/json');
+    $finalResult = array("status" => $status, "response" => $rdata, "seodata" => $seoData);
+    //echo '<pre>'; print_r($finalResult); echo '</pre>'; exit;
+    echo \GuzzleHttp\json_encode($finalResult);
+    exit;
+  }
+}
+
+/**
+ * 
+ * @param type $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ * @param type $form_id
+ */
+function story_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+
+  $bdcontact = new \Drupal\story\BdContactStorage();
+  if ($form_id == 'node_videos_form' || $form_id == 'node_videos_edit_form') {
+
+    $nid = \Drupal::routeMatch()->getRawParameter('node');
+    $node = \Drupal\node\Entity\Node::load($nid);
+    $form['#attached']['library'][] = 'story/story';
+    $result = $bdcontact->getAllvodlist();
+    $op = array();
+    $li = "";
+    foreach ($result as $key => $item) {
+      $vpath = 'https://' . $item->s3_domain . '/' . $item->file_path;
+      $dailymotionid = $item->transcoding_source;
+      $transcoding_source = $item->transcoding_source;
+      $li .='<li><input id="' . $item->transcoding_id . '" value="' . $item->transcoding_id . '" data-item="' . $item->source_file_name . '" data-item-vpath="' . $vpath . '"  data-item-vpath-private="' . $vpath . '"  type="radio" name="svideo" />' . $item->source_file_name . '</li>';
+    }
+    $vt1 = "";
+    $vturl1 = "";
+    $play1 = '<div id="vplayvideo"></div>';
+
+    if (!empty($node)) {
+      $transid = $node->get('field_video_trans')->value;
+      $result1 = $bdcontact->getAllvodlistByTranscodingId($transid);
+      //	echo  '<pre>'; print_r($result1); exit;
+      $vt1 = $result1->source_file_name;
+      $vturl1 = 'https://' . $result1->s3_domain . '/' . $result1->file_path;
+      $dailymotionid = $item->transcoding_source;
+      $transcoding_source = $item->transcoding_source;
+      $play1 = '<div id="vplayvideo"></div>';
+      $play2 = '<div id="vplayvideopublish"><iframe frameborder="0" width="480" height="270" src="' . $vturl1 . '" allowfullscreen allow="autoplay"></iframe></div>';
+    }
+    $form['field_video_trans']['#type'] = 'inline_template';
+    $form['field_video_trans']['#template'] = '<script type="text/javascript">					window.addEventListener(\'load\',   
+					function() {
+					jQuery("#edit-field-date-0-value").datepicker({dateFormat: "yy-mm-dd"});
+					jQuery("#edit-field-date-0-value").on("keyup change", function(){
+					var a = prompt("Enter the time as hh-mm-ss", "00:00:00");
+					var date = jQuery(this).val();
+					jQuery("#edit-field-date-0-value").val(date + " " + a)
+					});
+
+					});
+
+					</script><div class="tbvideolist" ><input name="searchkeyword" id="searchkeyword" type=""><input id="searchvideo"  type="button" value="Search"/><input style="display:none;" id="searchvideoReset"  type="button" value="Reset"/><div ><h4>Video List</h4><ul class="vodlists" style="text-align: left; padding: 10px; overflow-y: scroll; height: 300px; width: 400px;">' . $li . '</ul></div><div><p  class="tbvideolistR">' . $vt1 . '</p></div>' . $play1 . '</div><div>' . $play2 . '</div>';
+
+    $form['#validate'][] = 'story_video_form_FORM_ID_validate';
+    $form['actions']['submit']['#submit'][] = 'story_video_enabled_types_submit';
+  }
+
+  if ($form_id == 'node_story_form' || $form_id == 'node_story_edit_form' || $form_id == 'node_gallery_form' || $form_id == 'node_gallery_edit_form'
+  ) {
+
+    $nid = \Drupal::routeMatch()->getRawParameter('node');
+    $node = \Drupal\node\Entity\Node::load($nid);
+    $form['#attached']['library'][] = 'story/story';
+    $form['field_date']['#title'] = 'Published Date';
+    if (!empty($node)) {
+      $d = date("Y/m/d H:i:s", $node->get('field_date')->value);
+      $form['field_date']['widget'][0]['value']['#default_value'] = $d;
+    }
+
+    $form['field_date']['#type'] = 'inline_template';
+    $form['field_date']['#template'] = '
+					<script type="text/javascript">
+					
+					window.addEventListener(\'load\',   
+					function() {
+					jQuery("#edit-field-date-0-value").datepicker({dateFormat: "yy-mm-dd"});
+					jQuery("#edit-field-date-0-value").on("keyup change", function(){
+					var a = prompt("Enter the time as hh-mm-ss", "00:00:00");
+					var date = jQuery(this).val();
+					jQuery("#edit-field-date-0-value").val(date + " " + a)
+					});
+
+					});
+
+					</script>';
+
+    $form['#validate'][] = 'story_story_form_FORM_ID_validate';
+
+    if ($form_id == 'node_story_form' || $form_id == 'node_gallery_form') {
+      $form['actions']['submit']['#submit'][] = 'story_upload_enabled_types_submit';
+    }
+    $form['actions']['submit']['#submit'][] = 'story_upload_enabled_types_remove_chache_submit';
+  }
+}
+
+/**
+ * 
+ * @param array $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ */
+function story_video_form_FORM_ID_validate(array &$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $mdt = strip_tags($form_state->getValue('body')[0]['value']);
+  $mdt = explode(" ", $mdt);
+  $mdt = array_slice($mdt, 0, 50);
+  $mdt = implode(" ", $mdt);
+  $form_state->getValue('field_meta_title_gallery')[0]['value'] = $form_state->getValue('title')[0]['value'];
+//$form_state->getValue('field_meta_description')[0]['value']=  $mdt;
+  $form_state->getValue('field_date')[0]['value'] = strtotime($form_state->getValue('field_date')[0]['value']);
+}
+
+/**
+ * 
+ * @param array $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ * @param type $form_id
+ */
+function story_video_enabled_types_submit(array &$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  $nid = $form_state->getValues()['nid'];
+  $title = $form_state->getValue('title')[0]['value'];
+  $field_video_trans = $form_state->getValue('field_video_trans')[0]['value'];
+  $videokey = str_replace("//www.dailymotion.com/embed/video/", "", $form_state->getValue('field_video_trans_url')[0]['value']);
+
+  $entity = $form_state->getFormObject()->getEntity();
+  $entity->set('field_old_id', $nid);
+  $entity->save();
+
+  db_update('multimedia')->fields(array(
+      'content_id' => 0
+    ))
+    ->condition('content_id', $nid)
+    ->execute();
+
+  db_update('multimedia')->fields(array(
+      'content_id' => $nid
+    ))
+    ->condition('transcoding_id', $field_video_trans)
+    ->execute();
+}
+
+/**
+ * 
+ * @param type $url
+ * @param type $data
+ * @return type
+ */
+function curlPost($url, $data = NULL) {
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL, $url);
+  curl_setopt($ch, CURLOPT_FRESH_CONNECT, TRUE);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_TIMEOUT, 1000);
+  if (!empty($data)) {
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+  }
+  $result = curl_exec($ch);
+  if (curl_error($ch)) {
+    echo 'error:' . curl_error($ch);
+  }
+  curl_close($ch);
+  return json_decode($result, true);
+}
+
+/**
+ * 
+ * @param array $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ */
+function story_story_form_FORM_ID_validate(array &$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $mdt = strip_tags($form_state->getValue('body')[0]['value']);
+  $mdt = explode(" ", $mdt);
+  $mdt = array_slice($mdt, 0, 50);
+  $mdt = implode(" ", $mdt);
+  $form_state->getValue('field_meta_title_gallery')[0]['value'] = $form_state->getValue('title')[0]['value'];
+  $form_state->getValue('field_date')[0]['value'] = strtotime($form_state->getValue('field_date')[0]['value']);
+}
+
+/**
+ * 
+ * @param array $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ * @param type $form_id
+ */
+function story_upload_enabled_types_submit(array &$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  $nid = $form_state->getValues()['nid'];
+  $entity = $form_state->getFormObject()->getEntity();
+  $entity->set('field_old_id', $nid);
+  $entity->save();
+}
+
+/**
+ * 
+ * @param array $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ */
+function story_upload_enabled_types_remove_chache_submit(array &$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $nid = $form_state->getValues()['nid'];
+  $oldid = $form_state->getValue('field_old_id')[0]['value'];
+  $form_id = "node_story_form";
+  if ($form_id == 'node_gallery_form' || $form_id == 'node_gallery_edit_form'
+  ) {
+    $type = "gallery";
+  }
+  
+  if ($form_id == 'node_story_form' || $form_id == 'node_story_edit_form') {
+    $type = "story";
+  }
+
+  $purkeyJson = "COSMO_JSON_API__api_storydata_nid_" . $oldid . "_" . $type;
+  $purkeyHtml = "COSMO_HTML__api_storydata_nid_" . $oldid . "_" . $type;
+  $akpath = $form_state->getValue('path')[0]['alias'];
+  clearOsCache("json", $purkeyJson);
+  clearOsCache("json", $purkeyHtml);
+  akamaipurse($akpath, $form_state->getValues()['status']['value']);
+}
+
+/**
+ * 
+ * @param type $storyurl
+ * @param type $contentStaus
+ * @return type
+ */
+function akamaipurse($storyurl, $contentStaus = NULL) {
+  
+  $url = "http://specials.intoday.in/purge-api/cpapi.php?URL=https://www.cosmopolitan.in" . $storyurl;
+  $akarespons = file_get_contents($url);
+  if (empty($contentStaus))
+    return;
+  $to = 'arun.kumarmishra@aajtak.com';
+
+// Subject
+  $subject = 'cosmo story add , update   ' . $storyurl;
+// Message
+  $message = 'storyurl : ' . $storyurl . '<br>akamai url:' . $url . '<br> akarespons : <br>' . print_r($akarespons, true);
+// To send HTML mail, the Content-type header must be set
+  $headers[] = 'MIME-Version: 1.0';
+  $headers[] = 'Content-type: text/html; charset=iso-8859-1';
+// Additional headers
+  $headers[] = 'To: cosmopolitan <cosmotest@intoday.in>';
+  $headers[] = 'From:  <cosmotest@intoday.in>';
+// Mail it
+  mail($to, $subject, $message, implode("\r\n", $headers));
+}
+
+/**
+ * 
+ * @global type $out
+ * @global type $database
+ * @global type $my
+ * @global type $mainframe
+ * @param type $type
+ * @param string $url
+ */
+function clearOsCache($type = 'json', $url) {
+  global $out, $database, $my, $mainframe;
+  $jsonpath = '';
+  $path = 'api/purge/node/' . $url;
+  $string = file_get_contents("http://cloudapi.itgd.in/awsinfo/json/cosmo_server.json");
+  $rs = json_decode($string, true);
+  foreach ($rs['COSMO-WEB'] as $k => $v) {
+    $ip = $v['private_ip'];
+    $url = 'http://' . $ip . '/' . $path;
+    $data[$k]['url'] = $url;
+    $data[$k]['host'] = 'cosmopolitan.in';
+  }
+  $result = multiRequest($data);
+  $write_data = print_r($result, true);
+}
+
+/**
+ * 
+ * @param type $data
+ * @param type $options
+ * @return type
+ */
+function multiRequest($data, $options = array()) {
+  $curly = array();
+  $result = array();
+  $mh = curl_multi_init();
+  // loop through $data and create curl handles
+  // then add them to the multi-handle
+  foreach ($data as $id => $d) {
+    $curly[$id] = curl_init();
+    $url = (is_array($d) && !empty($d['url'])) ? $d['url'] : $d;
+    curl_setopt($curly[$id], CURLOPT_URL, $url);
+    curl_setopt($curly[$id], CURLOPT_HEADER, 0);
+    curl_setopt($curly[$id], CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curly[$id], CURLOPT_FOLLOWLOCATION, 1);
+    if (is_array($d)) {
+      if (!empty($d['host'])) {
+        curl_setopt($curly[$id], CURLOPT_HTTPHEADER, array('Host: ' . $d['host']));
+      }
+      if (!empty($d['akamaipwd'])) {
+        curl_setopt($curly[$id], CURLOPT_USERPWD, $d['akamaipwd']);
+      }
+      if (!empty($d['post'])) {
+        curl_setopt($curly[$id], CURLOPT_POST, 1);
+        curl_setopt($curly[$id], CURLOPT_POSTFIELDS, $d['post']);
+      }
+    }
+    // extra options?
+    if (!empty($options)) {
+      curl_setopt_array($curly[$id], $options);
+    }
+    curl_multi_add_handle($mh, $curly[$id]);
+  }
+  // execute the handles
+  $running = null;
+  do {
+    curl_multi_exec($mh, $running);
+  } while ($running > 0);
+
+  // get content and remove handles
+  foreach ($curly as $id => $c) {
+    $result[$id] = curl_multi_getcontent($c);
+    curl_multi_remove_handle($mh, $c);
+  }
+  // all done
+  curl_multi_close($mh);
+  sendNotificationMail($result);
+  return $result;
+}
+
+/**
+ * 
+ * @param type $message
+ */
+function sendNotificationMail($message) {
+
+  $to = 'arun.kumarmishra@aajtak.com';
+// Subject
+  $subject = 'sendNotificationMail node cache';
+// Message
+  $message = print_r($message, true);
+// To send HTML mail, the Content-type header must be set
+  $headers[] = 'MIME-Version: 1.0';
+  $headers[] = 'Content-type: text/html; charset=iso-8859-1';
+// Additional headers
+  $headers[] = 'To: cosmopolitan <cosmotest@intoday.in>';
+  $headers[] = 'From:  <cosmotest@intoday.in>';
+// Mail it
+  mail($to, $subject, $message, implode("\r\n", $headers));
+}

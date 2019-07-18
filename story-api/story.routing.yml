@@ -1,0 +1,45 @@
+story_api_homepage:
+  path: '/api/rest/homepage'
+  defaults:
+    _controller: '\Drupal\vod\Controller\AdminController::homepage'
+  requirements:
+    _permission: 'access content'
+
+story_api_nomination:
+  path: '/api/nomination'
+  defaults:
+    _controller: '\Drupal\vod\Controller\AdminController::nomination'
+  requirements:
+    _permission: 'access content'
+    
+story_add:
+  path: '/admin/content/story/add'
+  defaults:
+    _form: '\Drupal\story\AddForm'
+    _title: 'Api Purge'
+  requirements:
+    _permission: 'access content'
+
+story_edit:
+  path: 'admin/content/story/edit/{id}'
+  defaults:
+    _form: '\Drupal\story\AddForm'
+    _title: 'Edit contact'
+  requirements:
+    _permission: 'access content'
+
+story_delete:
+  path: '/admin/content/story/delete/{id}'
+  defaults:
+    _form: 'Drupal\story\DeleteForm'
+    _title: 'Delete contact'
+  requirements:
+    _permission: 'access content'
+    
+story_published:
+  path: '/admin/content/story/published/{id}'
+  defaults:
+    _form: 'Drupal\story\PublishedForm'
+    _title: 'Published'
+  requirements:
+    _permission: 'access content'    

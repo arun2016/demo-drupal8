@@ -1,0 +1,44 @@
+story_list:
+    title: story
+    route_name: story_list
+    base_route: system.admin_content
+
+story_list_search:
+        title: search
+        route_name: story_list_search
+        base_route: system.admin_content
+                 
+story_api_tagsearch: 
+        title: tag search
+        route_name: story_api_tagsearch
+        base_route: system.admin_content
+ 
+story_api_fulltextsearch: 
+        title: Full text search search
+        route_name: story_api_fulltextsearch
+        base_route: system.admin_content
+        
+story_api_elasticsearch: 
+        title: Full text elasticsearch search
+        route_name: story_api_elasticsearch
+        base_route: system.admin_content
+
+story_api_blocksearch: 
+        title: Full text Block search
+        route_name: story_api_blocksearch
+        base_route: system.admin_content
+                   
+story_api_dashboardapi: 
+        title: Full text Block search
+        route_name: story_api_dashboardapi
+        base_route: system.admin_content
+
+story_api_homepage: 
+        title: Home Page Api
+        route_name: story_api_homepage
+        base_route: system.admin_content
+
+story_api_videopage: 
+        title: Home Page Api
+        route_name: story_api_videopage
+        base_route: system.admin_content

@@ -1,0 +1,7 @@
+name: Story
+description: 'story api'
+type: module
+core: 8.x
+package: Story
+libraries:
+    - story/story
