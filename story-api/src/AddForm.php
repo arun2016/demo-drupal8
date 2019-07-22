@@ -76,8 +76,7 @@ class AddForm extends FormBase {
   }
   
   function my_node_updatecb() {
-    echo "asdfa";
-    exit;
+    /* Code here */
   }
 
   function clearOsCache($url) {
@@ -146,16 +145,12 @@ class AddForm extends FormBase {
       curl_multi_exec($mh, $running);
     } while ($running > 0);
 
-
     // get content and remove handles
     foreach ($curly as $id => $c) {
       $result[$id] = curl_multi_getcontent($c);
       curl_multi_remove_handle($mh, $c);
     }
-
-    // all done
     curl_multi_close($mh);
-    //echo "<pre>";print_r($result);die;
     return $result;
   }
 
@@ -163,7 +158,7 @@ class AddForm extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    
+    /* Code here */
   }
   
   /**

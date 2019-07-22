@@ -46,8 +46,7 @@ function story_views_pre_render(Drupal\views\ViewExecutable $view) {
     header('Content-Type: application/json');
     $finalResult = array("status" => $status, "response" => $rdata);
 
-    echo \GuzzleHttp\json_encode($finalResult);
-    exit;
+    return \GuzzleHttp\json_encode($finalResult);
   }
 
   if (($view->id() == "frontpage" || $view->id() == "section_data_by_name" || $view->id() == "search" ) && $view->current_display == 'rest_export_1') {
@@ -89,9 +88,7 @@ function story_views_pre_render(Drupal\views\ViewExecutable $view) {
 
     header('Content-Type: application/json');
     $finalResult = array("status" => $status, "response" => $rdata, "seodata" => $seoData);
-    //echo '<pre>'; print_r($finalResult); echo '</pre>'; exit;
-    echo \GuzzleHttp\json_encode($finalResult);
-    exit;
+    return \GuzzleHttp\json_encode($finalResult);
   }
 }
 
@@ -200,7 +197,6 @@ function story_video_form_FORM_ID_validate(array &$form, \Drupal\Core\Form\FormS
   $mdt = array_slice($mdt, 0, 50);
   $mdt = implode(" ", $mdt);
   $form_state->getValue('field_meta_title_gallery')[0]['value'] = $form_state->getValue('title')[0]['value'];
-//$form_state->getValue('field_meta_description')[0]['value']=  $mdt;
   $form_state->getValue('field_date')[0]['value'] = strtotime($form_state->getValue('field_date')[0]['value']);
 }
 

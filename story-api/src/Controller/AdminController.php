@@ -15,9 +15,7 @@ use Drupal\story\BdContactStorage;
 class AdminController extends ControllerBase {
 
   function nomination() {
-    echo '<pre>';
-    print_r($_POST);
-    exit;
+    /* code here */
   }
 
   function ckimageupload() {
@@ -57,9 +55,6 @@ class AdminController extends ControllerBase {
     file_unmanaged_copy($file_name, 'sites/default/files/' . $contentType . '/images/' . basename($url));
     $image = File::create(['uri' => 'public://' . $contentType . '/images/' . basename($url)]);
     $image->save();
-    echo '<pre>';
-    print_r($image);
-    exit;
     return $image->id();
   }
 
@@ -108,8 +103,7 @@ class AdminController extends ControllerBase {
     }
     header('Content-Type: application/json');
     $finalResult = array("status" => $status, "response" => $rdata);
-    echo \GuzzleHttp\json_encode($finalResult);
-    exit;
+    return \GuzzleHttp\json_encode($finalResult);
   }
 
   function videopagesearch() {
@@ -127,8 +121,7 @@ class AdminController extends ControllerBase {
       $transcoding_source = split('-', $item->transcoding_source);
       $li .='<li><input id="' . $item->id . '" value="' . $item->id . '" data-item="' . $item->source_file_name . '" data-item-vpath="' . $transcoding_source[1] . '"  data-item-vpath-private="' . $transcoding_source[2] . '"  type="radio" name="svideo" />' . $item->source_file_name . '</li>';
     }
-    echo $li;
-    exit;
+    return $li;
   }
 
   function videopage() {
@@ -145,32 +138,31 @@ class AdminController extends ControllerBase {
       }
       header('Content-Type: application/json');
       $finalResult = array("status" => 200, "response" => $fimg);
-      echo \GuzzleHttp\json_encode($finalResult);
-      exit;
+      return \GuzzleHttp\json_encode($finalResult);
     }
 
     if ($_GET['vid'] == 12307) {
       $rdata[0] = BdContactStorage::getnodedatalist(12307);
-      $rdata[0]['body'] = "She recently posted a selfie of Shah Rukh Khan and son Aryan Khan and captioned it, 'Strike a pose ...â¤ï¸'.";
+      $rdata[0]['body'] = "She recently posted a selfie of Shah Rukh Khan and son Aryan Khan and captioned it, 'Strike a pose ...â?¤ï¸?'.";
       $rdata[0]['videourl'] = "http://www.dailymotion.com/embed/video/x6knlyy";
       $rdata[0]['type'] = "video";
       $rdata[0]['path'] = "/video/v12307/here-are-some-unseen-photos-soon-be-married-couple";
     }
     elseif ($_GET['vid'] == 15041) {
       $rdata[0] = BdContactStorage::getnodedatalist(15041);
-      $rdata[0]['body'] = "She recently posted a selfie of Shah Rukh Khan and son Aryan Khan and captioned it, 'Strike a pose ...â¤ï¸'.";
+      $rdata[0]['body'] = "She recently posted a selfie of Shah Rukh Khan and son Aryan Khan and captioned it, 'Strike a pose ...â?¤ï¸?'.";
       $rdata[0]['videourl'] = "http://www.dailymotion.com/embed/video/x6knks2";
       $rdata[0]['type'] = "video";
       $rdata[0]['path'] = "/video/v15041/here-are-some-unseen-photos-soon-be-married-couple";
     }
     else {
       $rdata[0] = BdContactStorage::getnodedatalist(12307);
-      $rdata[0]['body'] = "She recently posted a selfie of Shah Rukh Khan and son Aryan Khan and captioned it, 'Strike a pose ...â¤ï¸'.";
+      $rdata[0]['body'] = "She recently posted a selfie of Shah Rukh Khan and son Aryan Khan and captioned it, 'Strike a pose ...â?¤ï¸?'.";
       $rdata[0]['videourl'] = "http://www.dailymotion.com/embed/video/x6knlyy";
       $rdata[0]['type'] = "video";
       $rdata[0]['path'] = "/video/v12307/here-are-some-unseen-photos-soon-be-married-couple";
       $rdata[1] = BdContactStorage::getnodedatalist(15041);
-      $rdata[1]['body'] = "She recently posted a selfie of Shah Rukh Khan and son Aryan Khan and captioned it, 'Strike a pose ...â¤ï¸'.";
+      $rdata[1]['body'] = "She recently posted a selfie of Shah Rukh Khan and son Aryan Khan and captioned it, 'Strike a pose ...â?¤ï¸?'.";
       $rdata[1]['videourl'] = "http://www.dailymotion.com/embed/video/x6knks2";
       $rdata[1]['type'] = "video";
       $rdata[1]['path'] = "/video/v15041/here-are-some-unseen-photos-soon-be-married-couple";
@@ -178,8 +170,7 @@ class AdminController extends ControllerBase {
 
     header('Content-Type: application/json');
     $finalResult = array("status" => 200, "response" => $rdata);
-    echo \GuzzleHttp\json_encode($finalResult);
-    exit;
+    return \GuzzleHttp\json_encode($finalResult);
   }
 
   function homepage() {
@@ -224,13 +215,7 @@ class AdminController extends ControllerBase {
     }
     header('Content-Type: application/json');
     $finalResult = array("status" => 200, "response" => $rdata);
-    echo '<pre>';
-    print_r($finalResult);
-    echo '</pre>';
-    exit;
-
-    echo \GuzzleHttp\json_encode($finalResult);
-    exit;
+    return \GuzzleHttp\json_encode($finalResult);
   }
 
   function dashboardapi() {
@@ -269,8 +254,7 @@ class AdminController extends ControllerBase {
     if ($onlycount == 1) {
       header('Content-Type: application/json');
       $finalResult = array("status" => 200, "response" => "", "totalcount" => $totalcount);
-      echo \GuzzleHttp\json_encode($finalResult);
-      exit;
+      return \GuzzleHttp\json_encode($finalResult);
     }
 
     $i = 0;
@@ -284,8 +268,7 @@ class AdminController extends ControllerBase {
     $seoData = array("title" => $type . "," . $name, "description" => $type . "," . $name, "keyword" => $type . "," . $name);
     header('Content-Type: application/json');
     $finalResult = array("status" => 200, "response" => $rdata, "section_data" => $vals, "totalcount" => $totalcount);
-    echo \GuzzleHttp\json_encode($finalResult);
-    exit;
+    return \GuzzleHttp\json_encode($finalResult);
   }
 
   function tagSearch() {
@@ -340,8 +323,7 @@ class AdminController extends ControllerBase {
     $seoData = array("title" => $type . "," . $name, "description" => $type . "," . $name, "keyword" => $type . "," . $name);
     header('Content-Type: application/json');
     $finalResult = array("status" => 200, "response" => $rdata, "seodata" => $seoData);
-    echo \GuzzleHttp\json_encode($finalResult);
-    exit;
+    return \GuzzleHttp\json_encode($finalResult);
   }
 
   function blocksearch() {
@@ -368,8 +350,7 @@ class AdminController extends ControllerBase {
     $seoData = array("title" => $block->field_home_meta_title->value, "description" => $block->field_home_meta_description->value, "keyword" => $block->field_home_meta_keyword->value);
     header('Content-Type: application/json');
     $finalResult = array("status" => 200, "topfile" => $topfile, "singletop" => $singletop, "seodata" => $seoData);
-    echo \GuzzleHttp\json_encode($finalResult);
-    exit;
+    return \GuzzleHttp\json_encode($finalResult);
   }
 
   function elasticsearch() {
@@ -446,8 +427,7 @@ class AdminController extends ControllerBase {
 
     header('Content-Type: application/json');
     $finalResult = array("items" => $eladata);
-    echo \GuzzleHttp\json_encode($finalResult);
-    exit;
+    return \GuzzleHttp\json_encode($finalResult);
   }
 
   function fulltextSearch() {
@@ -476,8 +456,7 @@ class AdminController extends ControllerBase {
     header('Content-Type: application/json');
     $finalResult = array("status" => 200, "response" => $res, "seodata" => $seoData);
 
-    echo \GuzzleHttp\json_encode($finalResult);
-    exit;
+    return \GuzzleHttp\json_encode($finalResult);
   }
 
   public function content1() {
@@ -548,7 +527,6 @@ var editor = CKEDITOR.instances['edit-body-0-value'];
 
     </form>
     <?php
-    exit;
   }
 
   function fbUrlCheck($validUrl) {
@@ -581,11 +559,9 @@ var editor = CKEDITOR.instances['edit-body-0-value'];
     $secondCheck = '/<(.*)iframe src="(.*):\/\/giphy\.com\/embed\/.*"(.*)><\/iframe>/i';
 
     if (preg_match($re, $validUrl) == 1 || preg_match($secondCheck, $validUrl) == 1) { //
-      //echo 'Gipfy URL is valid!';
       return 'gipfy';
     }
     else {
-      //echo 'Gipfy URL is not valid!';
       return false;
     }
   }
@@ -593,11 +569,9 @@ var editor = CKEDITOR.instances['edit-body-0-value'];
   function instaUrlCheck($validUrl) {
     $re = '/(https?:\/\/(www\.)?)?instagram\.com(\/p\/\w+\/?)/i';
     if (preg_match($re, $validUrl) == 1) { //
-      //echo 'Instagram URL is valid!';
       return 'instagram';
     }
     else {
-      //echo 'Instagram URL is not valid!';
       return false;
     }
   }
@@ -605,11 +579,9 @@ var editor = CKEDITOR.instances['edit-body-0-value'];
   function twitterUrlCheck($validUrl) {
     $re = '/(?:http:\/\/)?(?:www\.)?twitter\.com\/(?:(?:\w)*#!\/)?(?:pages\/)?(?:[\w\-]*\/)*([\w\-]*)/i';
     if (preg_match($re, $validUrl) == 1) { //
-      //echo 'Twitter URL is valid!';
       return 'twitter';
     }
     else {
-      //echo 'Twitter URL is not valid!';
       return false;
     }
   }
@@ -617,11 +589,9 @@ var editor = CKEDITOR.instances['edit-body-0-value'];
   function youtubeUrlCheck($validUrl) {
     $re = '/(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([\w-_]+)/i';
     if (preg_match($re, $validUrl) == 1) { //
-      //echo 'Youtube URL is valid!';
       return 'youtube';
     }
     else {
-      //echo 'Youtube URL is not valid!';
       return false;
     }
   }
@@ -630,7 +600,6 @@ var editor = CKEDITOR.instances['edit-body-0-value'];
     $finalString = "";
     $re = '/https:\/\/twitter\.com\/\w+\/status\/\d+(\?\w+\=[^\"]*|)/mi';
     preg_match_all($re, $validUrl, $matches);
-// echo "<pre>";print_r($matches);die;
     foreach ($matches[0] as $result) {
       $finalString .="[twitter]" . $result . "[/twitter]<br>";
     }
@@ -641,7 +610,6 @@ var editor = CKEDITOR.instances['edit-body-0-value'];
     $finalString = "";
     $re = '/([^data-instgrm-permalink="]|href=")((https|http):\/\/(www.|)instagr(\.am|am\.com)\/\w\/\w+\/(\?\w+\=[^\"]*|))/im';
     preg_match_all($re, $validUrl, $matches);
-//echo "<pre>";print_r($matches);die;
     foreach ($matches[2] as $result) {
       $finalString .="[instagram]" . $result . "[/instagram]<br>";
     }
@@ -652,7 +620,7 @@ var editor = CKEDITOR.instances['edit-body-0-value'];
     $finalString = "";
     $re = '/http(s)?:\/\/(www.|)pin(\.(.*?)\/|terest\.(.*?)\/)(\w+|pin)(\/\w+\/|)/mi';
     preg_match_all($re, $validUrl, $matches);
-//echo "<pre>";print_r($matches);die;
+
     foreach ($matches[0] as $result) {
       $finalString .="[pinterest]" . $result . "[/pinterest]<br>";
     }
@@ -663,7 +631,6 @@ var editor = CKEDITOR.instances['edit-body-0-value'];
     $finalString = "";
     $re = '/(http(s)?:\/\/(www.|)facebook\.com.*|src="(http(s)?:\/\/(www.|)facebook.com[^"]+)")/';
     preg_match_all($re, $validUrl, $matches);
-//echo "<pre>";print_r($matches);die;
     foreach ($matches[0] as $result) {
       $finalString .="[facebook]" . str_replace(array('src="', '"'), '', $result) . "[/facebook]<br>";
     }
@@ -675,27 +642,33 @@ var editor = CKEDITOR.instances['edit-body-0-value'];
 
   function parseYoutube($validUrl) {
     $finalString = "";
-//$re = '/(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([\w-_]+)/';
     $re = '/(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?(\/?.*(?:watch|embed)(\?v=.*|\/)|\/.*).[\w-_]+/mi';
     preg_match_all($re, $validUrl, $matches);
-//echo "<pre>";print_r($matches);die;
     foreach ($matches[0] as $result) {
       $finalString .="[youtube]" . str_replace(array('src="', '"'), '', $result) . "[/youtube]<br>";
     }
     return $finalString;
   }
-
+  
+  /**
+   * 
+   * @param type $validUrl
+   * @return string
+   */
   function parseGiphy($validUrl) {
     $finalString = "";
     $re = '/(?<!href=")(?:https?:\/\/)(?:www.)?(?:media.)?(gph|giphy)?\.\w+\/\w+(:?\/)?[\w _-]+(:?\/[\w-_]+)?(:?.\w{3,4})/mi';
     preg_match_all($re, $validUrl, $matches);
-//echo "<pre>";print_r($matches);die;
     foreach ($matches[0] as $result) {
       $finalString .="[giphy]" . str_replace(array('src="', '"'), '', $result) . "[/giphy]<br>";
     }
     return $finalString;
   }
-
+  
+  /**
+   * 
+   * @return string
+   */
   public function getSearchvod111() {
     $nsearch1 = @$_POST['notsearch'];
     $keyword = @$_POST['keyword'];
@@ -745,10 +718,13 @@ var editor = CKEDITOR.instances['edit-body-0-value'];
     if ($_POST['action'] == "search") {
       $html .=' </tbody> </table>';
     }
-    echo $html;
-    exit;
+    return $html;
   }
-
+  
+  /**
+   * 
+   * @return type
+   */
   function content() {
     $csv = $this->readCSV('/opt/httpd/vhosts/cosmodrupal/Cosmodataonlybody-0-1000.csv');
     unset($csv[0]);
@@ -773,7 +749,12 @@ var editor = CKEDITOR.instances['edit-body-0-value'];
       $text1,
     );
   }
-
+  
+  /**
+   * 
+   * @param type $csvFile
+   * @return type
+   */
   function readCSV($csvFile) {
     $file_handle = fopen($csvFile, 'r');
     while (!feof($file_handle)) {
