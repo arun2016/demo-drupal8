@@ -1,0 +1,160 @@
+Drupal 8 Entity API cheat sheet
+
+Working with nodes
+Load a node by NID:
+
+$nid = 123;     // example value
+$node_storage = \Drupal::entityTypeManager()->getStorage('node');
+$node = $node_storage->load($nid);
+Get node's NID:
+
+echo $node->id();  // 123
+Get node's bundle type:
+
+echo $node->bundle();    // 'article'
+echo $node->getType();    // 'article' - this is the same as bundle() for most entities, but doesn't work for all entity types
+Get a built-in field value:
+
+echo $node->get('title')->value;           // "Lorem Ipsum..."
+echo $node->get('created')->value;         // 1510948801
+echo $node->get('body')->value;            // "The full node body, <strong>with HTML</strong>"
+echo $node->get('body')->summary;          // "This is the summary"
+// a custom text field
+echo $node->get('field_foo')->value;       // "whatever is in your custom field"
+// a file field
+echo $node->get('field_image')->target_id; // 432 (a managed file FID)
+or the shorthand, with magic getters:
+
+echo $node->title->value;            // "Lorem Ipsum..."
+echo $node->created->value;          // 1510948801
+echo $node->body->value;             // "This is the full node body, <strong>with HTML</strong>"
+echo $node->body->summary;           // "This is the summary"
+echo $node->field_foo->value;        // "whatever is in your custom field"
+echo $node->field_image->target_id;  // 432
+For more about that file entity target ID, see the "Working with File Entities" section below
+
+Get nodes from a query:
+
+$query = \Drupal::entityQuery('node')
+  ->condition('type', 'article'),
+  ->condition('field_foo', 42);
+$nids = $query->execute();
+$nodes = $node_storage->loadMultiple($nids);
+ 
+foreach ($nodes as $n) {
+  echo $n->title->value;            // "Lorem Ipsum..."
+ 
+  // do whatever you would do with a node object (set fields, save, etc.)
+  $n->set('title', "this is a test");
+  $n->save();
+}
+Set fields
+
+$node->set('title', "Moby Dick");
+$node->set('body', array(
+'summary' => "Book about a whale",
+'value' => "Call me Ishmael...",
+'format' => 'basic_html',
+));
+$node->save();
+Delete node(s)
+
+// one
+$nid = 42;      // example value
+$node = $node_storage->load($nid);
+$node->delete();
+ 
+// multiple
+$nids = [21,12,45,67];  // example value
+$nodes = $node_storage->loadMultiple($nids);
+$node_storage->delete($nodes);
+ 
+// multiple, loading one at a time to avoid "out of memory" errors - may be slow
+$nids = [21,12,45,67];  // example value
+foreach($nids as $nid)
+{
+  $node = $node_storage->load($nid);
+  $node->delete();
+}
+Working with Paragraphs
+"Paragraphs" (from the popular contrib module of the same name) are separate entities that are related to the parent nodes via an entity reference revision.
+
+$my_paragraph = null;
+ 
+foreach ($node->get('field_paragraph_reference') as $para) {
+  if ($para->entity->getType() == 'your_paragraph_type') {   // e.g., "main_content" or "social_media"
+    $my_paragraph = $para->entity;
+  }
+}
+ 
+if (!empty($my_paragraph)) {
+  // $my_paragraph is a regular entity and can be interacted with like any other entity
+  echo $my_paragraph->field_somefield->value;
+ 
+  // (however, they don't have a "title" like a node)
+  echo $my_paragraph->title->value;  // <-- this won't work
+} else {
+  echo "The node doesn't have this paragraph type.";
+}
+Get paragraph entity type:
+
+echo $my_paragraph->getType(); // "main_content"
+Working with File entities
+Managed files are also separate entities, which are associated with the node using a type of Entity Reference.
+
+Get a file by ID:
+
+$fid = 42;      // example value
+$file_storage = \Drupal::entityTypeManager()->getStorage('file');
+$file = $file_storage->load($fid);
+Get a file referenced in a node:
+
+$file = $node->field_image->entity;
+Reading some properties from a File entity:
+
+echo $file->getFileUri();   // "public://file123.jpg"
+// if you want the URL without Drupal's custom scheme, you can translate it to a plain URL:
+echo file_url_transform_relative(file_create_url($file->getFileUri()));   // "/sites/default/files/public/file123.jpg"
+echo $file->filename->value;   // "file123.jpg"
+echo $file->filemime->value;   // "image/jpeg"
+echo $file->filesize->value;   // 63518  (size in bytes)
+echo $file->created->value;    // 1511206249  (Unix timestamp)
+echo $file->changed->value;    // 1511234256  (Unix timestamp)
+echo $file->id();              // 432
+To see what other properties are available, look at the columns in the `file_managed` table.
+
+The file's user data
+
+echo $file->uid->target_id;               // 1
+echo $file->uid->value;                   // <-- doesn't work. Use target_id instead.
+echo $file->uid->entity->name->value;     // "alice"
+echo $file->uid->entity->timezone->value; // "America/Los_Angeles"
+Working with Entity References
+Reading from entity reference fields that allow multiple values:
+
+foreach ($node->field_my_entity_reference as $reference) {
+ 
+  // if you chose "Entity ID" as the display mode for the entity reference field,
+  // the target_id is the ONLY value you will have access to
+  echo $reference->target_id;    // 1 (a node's nid)
+ 
+  // if you chose "Rendered Entity" as the display mode, you'll be able to 
+  // access the rest of the node's data.
+  echo $reference->entity->title->value;    // "Moby Dick"
+ 
+}
+Populate the value of an entity reference field which allows multiple values (this replaces any existing value in the DB)
+
+$nids = [3,4,5,6];   // example value
+$node->set('field_my_entity_reference', $nids);
+$node->save();
+Append new referenced items to an entity reference field (this preserves existing values)
+
+$nids = [3,4,5,6];   // example value
+foreach ($nids as $nid) {
+  $node->field_my_entity_reference[] = [
+    'target_id' => $nid
+  ];
+}
+$node->save();
+I hope this saves everyone some time. It certainly is helpful to me every time I write a custom Drupal 8 module.
