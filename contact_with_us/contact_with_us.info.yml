@@ -1,0 +1,5 @@
+name: contact with us
+type: module
+description: 'contact with us form for corporate website'
+package: contact
+core: 8.x

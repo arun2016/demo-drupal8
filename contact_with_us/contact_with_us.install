@@ -1,0 +1,118 @@
+<?php
+
+/**
+ * @file
+ * Install and uninstall functions for the contact with us..
+ *
+ * This file contains the functions required to perform install and
+ * uninstall operations.
+ */
+
+/**
+ * Implements hook_schema().
+ *
+ * This defines the database table which will hold the example item info.
+ */
+function contact_with_us_schema() {
+  $schema['contact_with_us'] = [
+    'description' => 'Primay key of contact with us.',
+    'fields' => [
+      'id' => [
+        'description' => 'The primary identifier for each item',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'contact_fname' => [
+        'description' => 'First name of the Contact',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ],
+      'contact_lname' => [
+        'description' => 'Last name of the Contact',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ],
+      'contact_email' => [
+        'description' => 'Email of the Contact',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ],
+      'contact_mobile' => [
+        'description' => 'Email of the Contact',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ],
+      'contact_country' => [
+        'description' => 'Country of the Contact',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ],
+      'contact_state' => [
+        'description' => 'State of the Contact',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ],
+      'contact_query' => [
+        'description' => 'comments of the Contact',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'big',
+      ],
+      'contact_pincode' => [
+        'description' => 'pincode of the Contact',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        // 'default' => '',
+      ],
+      'user_id' => [
+        'description' => 'user id of the user',
+        'type' => 'int',
+        'length' => 11,
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'status' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => 'status for delete 0/1',
+      ],
+      'created' => [
+        'description' => 'Created time',
+        'type' => 'int',
+        'length' => 11,
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'updated' => [
+        'type' => 'int',
+        'description' => 'updated time',
+      ],
+    ],
+    'primary key' => ['id'],
+  ];
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function contact_with_us_install() {
+
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function contact_with_us_uninstall() {
+  db_drop_table('contact_with_us');
+}

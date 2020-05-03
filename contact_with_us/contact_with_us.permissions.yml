@@ -1,0 +1,8 @@
+manage contact:
+  title: 'Manage Contact records'
+  description: 'View, Approved and reject Queries'
+  restrict access: true
+approved contact:
+  title: 'Approved/Reject Contact'
+  description: 'Approved and reject Queries'
+  restrict access: true
